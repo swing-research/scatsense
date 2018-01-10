@@ -1,0 +1,96 @@
+syntax = "proto2";
+
+// Next Available: 16
+message DataInfo {
+    // Path to the test data.
+	repeated string input_folder = 1;
+	
+	// Path to write results.
+	optional string output_folder = 2;
+	
+	// Device used in the experiment.
+	optional Device device = 3;
+	
+	// Path to the source model.
+	optional string source_model = 4;
+
+	// Sampling frequency in Hertz.
+	optional double fs = 5;
+
+	// Number of FFT bins.
+	optional int32 nfft = 6;
+
+	// Discretization: number of directions.
+	optional int32 D = 7;
+
+	// Signal-to-noise ratio.
+	optional double SNR = 8;
+
+	// Number of sources.
+	optional int32 J = 9;
+
+	// Beta divergence.
+	optional int32 beta = 10 [default = 0];
+
+	// Number of times to run the experiment.
+	optional int32 runs = 11 [default = 5000]; 
+
+	// Width of bin.
+	optional int32 accuracy_bin = 12 [default = 10];
+
+    // Duration of the source signal.
+	optional double duration = 13;
+
+    // Error statistics after running the experiment.
+    optional Results summary = 14;
+
+    // Path to the train data.
+	optional string train_folder = 15;
+
+}
+
+// Next Available: 9
+message Device {
+	// Name of the device.
+	optional string name = 1;
+	
+	// Path to the impulse responses per direction.
+	optional string impulse_response = 2;
+
+	// Path to the frequency response per direction.
+	optional string freq_response = 3;
+	
+	// Index of the microphone to use.
+	optional int32 mic = 4;
+
+    // Starting frequency in Hertz.
+	optional double f0 = 5;
+	
+	// Lambda parameter for group sparsity.
+	optional double lam = 6;
+	
+	// Gamma parameter for sparsity.
+	optional double gam = 7;
+
+	message MultiresolutionParameters {
+		optional double lam = 1;
+		optional double gam = 2;
+		// Number of candidates to consider.
+		optional int32 top_k = 3 [default = 7];
+		// Number of neighbors per candidate.
+		optional int32 neighbors = 4 [default = 4];
+	}
+	// Sparsity parameters for the finer grid if multiresolution.
+	optional MultiresolutionParameters multires = 8;
+}
+
+// Next Available: 4
+message Results {
+	// Accuracy: percentage of sources localized to their bin simultaneously if more than one.
+	optional double accuracy = 1;
+	// Average error without outliers.
+	optional double robust_mean = 2;
+	// Accuracy per source: percentage of sources localized to their bin.
+	optional double accuracy_per_source = 3;
+}
+
