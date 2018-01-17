@@ -173,7 +173,7 @@ for rns in range(runs):
         for di,dir_cand in enumerate(theta_hat_topk):
             for ct in range(-neighbork,neighbork+1):
                 dir_ind = (dir_cand + 2*ct)%Df
-                new_candidates[ac_count] = dir_ind
+                new_candidates[af_count] = dir_ind
                 Af[:,af_count*k:(af_count+1)*k] = np.abs(H_theta0[f0:,dir_ind,m,np.newaxis])*W
                 af_count += 1
         Af = Af/np.linalg.norm(Af,axis=0)
@@ -181,7 +181,7 @@ for rns in range(runs):
         xs,_ = log_l1_nmf(np.abs(y), Af, pc, b=b, lam=lamc, gam=gamc)
         scores = np.linalg.norm(np.reshape(xs.T, (k*N,Dc), order='F'), axis=0, ord=1)
         best_dir = np.argpartition(scores, -J)[-J:] #indices of highest norms
-        theta_hat = new_candidates[theta_hat] #map coarse index to fine index
+        theta_hat = new_candidates[best_dir] #map coarse index to fine index
     
     min_err, best_perm = calculate_angle_error(theta, theta_hat, anglesf) #calculate error between estimated and true directions
     conf_matrix[theta, best_perm] += 1
