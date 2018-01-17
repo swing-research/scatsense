@@ -1,0 +1,17 @@
+
+output_folder: "results"
+
+device {
+	name: "kemar"
+	impulse_response: "data/kemar_h_theta_1deg_time.npy"
+	freq_response: "data/kemar_h_theta_1deg.npy"
+	mic: 1
+	f0: 0
+}
+
+fs: 16000
+nfft: 1024
+D: 36
+SNR: 10
+J: 1
+duration: 0.5
