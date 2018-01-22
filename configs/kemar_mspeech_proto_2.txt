@@ -1,5 +1,5 @@
 
-input_folder: "data/test_proto/female/"
+input_folder: "data/test_proto/male/"
 train_folder: "data/test_proto/"
 output_folder: "results"
 
@@ -17,4 +17,4 @@ fs: 16000
 nfft: 1024
 D: 36
 SNR: 30
-J: 1
+J: 2

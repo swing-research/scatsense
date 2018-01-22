@@ -4,17 +4,17 @@ train_folder: "data/test_proto/"
 output_folder: "results"
 
 device {
-	name: "kemar"
-	impulse_response: "data/kemar_h_theta_1deg_time.npy"
-	freq_response: "data/kemar_h_theta_1deg.npy"
-	mic: 1
-	f0: 0
+	name: "lego1"
+	impulse_response: "data/lego1_h_theta_1deg_time.npy"
+	freq_response: "data/lego1_h_theta_1deg.npy"
+	mic: 0
+	f0: 3000
 	lam: 10
-	gam: 0.1
+	gam: 10
 }
 
 fs: 16000
 nfft: 1024
 D: 36
 SNR: 30
-J: 1
+J: 2
