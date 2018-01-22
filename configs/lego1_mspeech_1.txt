@@ -1,0 +1,20 @@
+
+input_folder: "data/test/male/"
+output_folder: "results"
+
+device {
+	name: "lego1"
+	impulse_response: "data/lego1_h_theta_1deg_time.npy"
+	freq_response: "data/lego1_h_theta_1deg.npy"
+	mic: 0
+	f0: 3000
+	lam: 0.1
+	gam: 10
+}
+
+source_model: "data/usm_IS_sub192.npy"
+fs: 16000
+nfft: 1024
+D: 36
+SNR: 30
+J: 1
