@@ -49,10 +49,14 @@ runs = exp_info.runs #number of times to run the experiment
 
 # Load the source model (prototypes: magnitude spectra)
 path = exp_info.train_folder
+if not path:
+    sys.exit("Error: Please provide the path to the training folder.")
 folders = glob.glob(path+'*/*.npy') #list of speakers for validation
 folders.sort()
 
 L = len(folders) #number of speakers
+if L == 0:
+    sys.exit("Error: Training folder %s is empty."%exp_info.input_folder[folder_i])
 count = 0
 W0 = np.zeros((Fn,0))
 for sp in folders:
@@ -69,10 +73,14 @@ St = dict() #time domain signals
 L = dict() #number of speakers per folder
 for folder_i in range(num_folders):
     path = exp_info.input_folder[folder_i]
+    if not path:
+        sys.exit("Error: Please provide the path to the input test folder.")
     folders = glob.glob(path+'*.npy') #list of speakers for validation
     folders.sort() #the retrieved order is otherwise different on different machines
 
     L[folder_i] = len(folders) #number of speakers
+    if L[folder_i] == 0:
+        sys.exit("Error: Test folder %s is empty."%exp_info.input_folder[folder_i])
     S[folder_i] = dict() #source spectrograms
     St[folder_i] = dict() #source time domain signals (they have different durations)
     count = 0
