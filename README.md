@@ -44,8 +44,12 @@ Reproduce the results
 
 ### Configuration files
 
-Each experiment is goverened by a configuration file specifying which device to use, the spatial discretization, ... etc. The structure of the file and all the parameters are specified in `proto/info.proto`.
+Each experiment is governed by a configuration file specifying which device to use, the spatial discretization, ... etc. The structure of the file and all the parameters are specified in `proto/info.proto`.
 The configuration files used in the paper can be found in `configs`.
+
+### Data
+
+We use speech files from the TIMIT database stored as numpy arrays (the script `preread.py` does the conversion from wav file to .npy). The configuration files in `configs` assume the data is located in a subfolder of `data`, for e.g., `data/test/female/`. 
 
 ### Scripts
 

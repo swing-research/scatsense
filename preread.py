@@ -2,8 +2,7 @@ import numpy as np
 import glob
 from core.signal import load_audio_norm
 
-path ='data/test4/*/'
-path = 'data/test4_validation/'
+path = 'data/test/*/'
 folders = glob.glob(path+'*.WAV') #list of speakers for validation
 
 L = len(folders) #number of speakers
