@@ -44,12 +44,12 @@ def nmf(V,b=0,K=32,n_iter=100):
     for itern in range(1,n_iter):
         
         #update W
-        W =  W* (np.dot(V* np.power(V_ap,b-2),H.T) / np.dot(np.power(V_ap,b-1),H.T))**de
+        W =  W* (np.dot(V* np.power(V_ap,b-2), H.T) / np.dot(np.power(V_ap,b-1), H.T))**de
         V_ap = np.maximum(np.dot(W,H),eps)
     
         #update H
-        H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / np.dot(W.T,np.power(V_ap,b-1)))**de
-        V_ap = np.dot(W,H)
+        H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / np.dot(W.T, np.power(V_ap,b-1)))**de
+        V_ap = np.dot(W, H)
     
         #normalization
         scale = np.linalg.norm(W,axis=0) #norm of each column
@@ -78,8 +78,8 @@ def l1_nmf(V,W,b=0,gam=1,n_iter=100):
         
         
         Output:
-        - W and H such that V=WH
-        - cost: beta-divergence per iteration
+        - H such that V=WH
+        - cost: beta-divergence + penalty per iteration
         '''
     
     F,N = V.shape
@@ -102,6 +102,7 @@ def l1_nmf(V,W,b=0,gam=1,n_iter=100):
         cost[0] = np.sum(V*np.log(Vtmp) - V + V_ap) #KL divergence
     else: #b==2
         cost[0] = np.linalg.norm(V-V_ap,'fro') #Euclidean
+    cost[0] += gam*np.sum(H) 
 
     de = 1 #corrective exponent
     if b==0:
@@ -110,11 +111,11 @@ def l1_nmf(V,W,b=0,gam=1,n_iter=100):
         
         #update H
         if b==2:
-            tmp = np.maximum((np.dot(W.T, V* np.power(V_ap,b-2)) - gam) / (np.dot(W.T,np.power(V_ap,b-1))),eps)
+            tmp = np.maximum((np.dot(W.T, V* np.power(V_ap,b-2)) - gam) / (np.dot(W.T, np.power(V_ap,b-1))),eps)
             H = H* (tmp)**de
         else:
-            H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / (np.dot(W.T,np.power(V_ap,b-1))+gam))**de
-        V_ap = np.maximum(np.dot(W,H),eps)
+            H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / (np.dot(W.T, np.power(V_ap,b-1))+gam))**de
+        V_ap = np.maximum(np.dot(W, H),eps)
         
         #current cost
         Vtmp = V/V_ap #point-wise division
@@ -124,6 +125,7 @@ def l1_nmf(V,W,b=0,gam=1,n_iter=100):
             cost[itern] = np.sum(V*np.log(Vtmp) - V + V_ap) #KL divergence
         else: #b==2
             cost[itern] = np.linalg.norm(V-V_ap,'fro') #Euclidean
+        cost[itern] += gam*np.sum(H) 
     return H,cost
 
 def log_nmf(V,W,p,b=0,lam=1,n_iter=100):
@@ -139,8 +141,8 @@ def log_nmf(V,W,p,b=0,lam=1,n_iter=100):
         
         
         Output:
-        - W and H such that V=WH
-        - cost: beta-divergence per iteration
+        - H such that V=WH
+        - cost: beta-divergence + penalty per iteration
         '''
     
     F,N = V.shape
@@ -165,6 +167,8 @@ def log_nmf(V,W,p,b=0,lam=1,n_iter=100):
         cost[0] = np.sum(V*np.log(Vtmp) - V + V_ap) #KL divergence
     else: #b==2
         cost[0] = np.linalg.norm(V-V_ap,'fro') #Euclidean
+    group_norms = np.linalg.norm(np.reshape(H.T,(k*N,D),order='F'),axis=0,ord=1) #D groups
+    cost[0] += lam*np.sum(np.log10(group_norms+eps))
 
     de = 1 #corrective exponent
     if b==0:
@@ -172,18 +176,15 @@ def log_nmf(V,W,p,b=0,lam=1,n_iter=100):
     for itern in range(1,n_iter):
         
         #update H
-        #update H
-        group_norms = np.linalg.norm(np.reshape(H.T,(k*N,D),order='F'),axis=0,ord=1) #D groups
-        
-        #row_norm = np.linalg.norm(H,ord=1,axis=1)
         P = np.repeat(1./(eps+group_norms),k)
         
         if b==2:
-            tmp = np.maximum((np.dot(W.T, V* np.power(V_ap,b-2)) - lam*P[:,np.newaxis]) / (np.dot(W.T,np.power(V_ap,b-1))),eps)
+            tmp = np.maximum((np.dot(W.T, V* np.power(V_ap,b-2)) - lam*P[:,np.newaxis]) / (np.dot(W.T, np.power(V_ap,b-1))),eps)
             H = H* (tmp)**de
         else:
-            H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / (np.dot(W.T,np.power(V_ap,b-1))+lam*P[:,np.newaxis]))**de
-        V_ap = np.maximum(np.dot(W,H),eps)
+            H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / (np.dot(W.T, np.power(V_ap,b-1))+lam*P[:,np.newaxis]))**de
+        V_ap = np.maximum(np.dot(W, H),eps)
+        group_norms = np.linalg.norm(np.reshape(H.T,(k*N,D),order='F'),axis=0,ord=1) #D groups
         
         # compute current cost value
         Vtmp = V/V_ap #point-wise division
@@ -193,9 +194,10 @@ def log_nmf(V,W,p,b=0,lam=1,n_iter=100):
             cost[itern] = np.sum(V*np.log(Vtmp) - V + V_ap) #KL divergence
         else: #b==2
             cost[itern] = np.linalg.norm(V-V_ap,'fro') #Euclidean
+        cost[itern] += lam*np.sum(np.log10(group_norms+eps)) 
     return H,cost
 
-def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100):
+def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100, rand=False):
     
     ''' NMF with group sparsity and l1 penalty
         
@@ -210,8 +212,8 @@ def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100):
         
         
         Output:
-        - W and H such that V=WH
-        - cost: beta-divergence per iteration
+        - H such that V=WH
+        - cost: beta-divergence + penalties per iteration
         '''
     
     F,N = V.shape
@@ -221,7 +223,10 @@ def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100):
     k = p[0] #number of rows per group (assuming equally sized groups)
     
     #initialize H
-    H = W.T.dot(V)
+    if rand:
+        H = np.abs(np.random.randn(K,N)) #random initialization
+    else:
+        H = W.T.dot(V)
     
     eps = 1e-20 #small value, avoid division by zero
     
@@ -236,6 +241,8 @@ def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100):
         cost[0] = np.sum(V*np.log(Vtmp) - V + V_ap) #KL divergence
     else: #b==2
         cost[0] = np.linalg.norm(V-V_ap,'fro') #Euclidean
+    group_norms = np.linalg.norm(np.reshape(H.T,(k*N,D),order='F'),axis=0,ord=1) #D groups
+    cost[0] += lam*np.sum(np.log10(group_norms+eps)) + gam*np.sum(H)
 
     de = 1 #corrective exponent
     if b==0:
@@ -243,17 +250,15 @@ def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100):
     for itern in range(1,n_iter):
         
         #update H
-        group_norms = np.linalg.norm(np.reshape(H.T,(k*N,D),order='F'),axis=0,ord=1) #D groups
-        
-        #row_norm = np.linalg.norm(H,ord=1,axis=1)
         P = np.repeat(1./(eps+group_norms),k)
         if b==2:
-            tmp = np.maximum((np.dot(W.T, V* np.power(V_ap,b-2)) - gam - lam*P[:,np.newaxis]) / (np.dot(W.T,np.power(V_ap,b-1))),eps)
+            tmp = np.maximum((np.dot(W.T, V* np.power(V_ap,b-2)) - gam - lam*P[:,np.newaxis]) / (np.dot(W.T, np.power(V_ap,b-1))),eps)
             H = H* (tmp)**de
         else:
-            H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / (np.dot(W.T,np.power(V_ap,b-1))+lam*P[:,np.newaxis]+gam))**de
-        V_ap = np.maximum(np.dot(W,H),eps)
+            H = H* (np.dot(W.T, V* np.power(V_ap,b-2)) / (np.dot(W.T, np.power(V_ap,b-1))+lam*P[:,np.newaxis]+gam))**de
+        V_ap = np.maximum(np.dot(W, H),eps)
         
+        group_norms = np.linalg.norm(np.reshape(H.T,(k*N,D),order='F'),axis=0,ord=1) #D groups
         # compute current cost value (IS divergence)
         Vtmp = V/V_ap #point-wise division
         if b==0:
@@ -262,6 +267,7 @@ def log_l1_nmf(V,W,p,b=0,lam=1,gam=1,n_iter=100):
             cost[itern] = np.sum(V*np.log(Vtmp) - V + V_ap) #KL divergence
         else: #b==2
             cost[itern] = np.linalg.norm(V-V_ap,'fro') #Euclidean
+        cost[itern] += lam*np.sum(np.log10(group_norms+eps)) + gam*np.sum(H) 
 
 
     return H,cost
